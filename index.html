@@ -1,0 +1,225 @@
+//https://www.youtube.com/watch?v=4yilm0ssvXU&t=344s
+
+var CHANNEL_ACCESS_TOKEN = 't89/1O/w1cDnyilFU='; 
+var line_endpoint = 'https://api.line.me/v2/bot/message/reply';
+
+function doGet (request) {
+  return ContentService.createTextOutput(JSON.stringify({
+    post: "ok"
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
+var sheet1 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Data2");
+var data = sheet1.getRange(2, 1, sheet1.getLastRow(),sheet1.getLastColumn()).getValues();
+var result = 'ไม่พบข้อมูล นักเรียน';
+
+function doPost(e) {
+
+  var json = JSON.parse(e.postData.contents);
+
+  var reply_token= json.events[0].replyToken;
+
+  var message = json.events[0].message.text;  
+
+   for (var i = 0; i < data.length; i++) 
+  { // avoid duplicate row
+    if(data[i][0] == message ){
+    
+      i=i+2;// Loop แถวที่2
+      var IDNO = sheet1.getRange(i,1).getValue(); //รหัสนักเรียน
+      var Name = sheet1.getRange(i,2).getValue(); //ชื่อ - นามสกุล
+      var Data1 = sheet1.getRange(i,3).getValue(); //ภาษาไทย
+      var Data2 = sheet1.getRange(i,4).getValue(); //คณิตศาสตร์
+      var Data3 = sheet1.getRange(i,5).getValue(); //ภาษาอังกฤษ
+      var ShowImage =  sheet1.getRange(i,6).getValue(); //ภาพ
+
+     
+      result =  {
+    "type": "bubble",
+    "direction": "ltr",
+    "hero": {
+      "type": "image",
+      "url" : ShowImage,
+      "size": "full",
+      "aspectRatio": "20:13",
+      "aspectMode": "cover",
+      "action": {
+        "type": "uri",
+        "label": "Line",
+        "uri": "https://linecorp.com/"
+      }
+    },
+    "body": {
+      "type": "box",
+      "layout": "vertical",
+      "contents": [
+        {
+          "type": "text",
+          "text": IDNO +" "+ Name ,
+          "size": "xl",
+          "weight": "bold"
+        },
+        {
+          "type": "box",
+          "layout": "baseline",
+          "margin": "md",
+          "contents": [
+            {
+              "type": "icon",
+              "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png",
+              "size": "sm"
+            },
+            {
+              "type": "icon",
+              "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png",
+              "size": "sm"
+            },
+            {
+              "type": "icon",
+              "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png",
+              "size": "sm"
+            },
+            {
+              "type": "icon",
+              "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png",
+              "size": "sm"
+            },
+            {
+              "type": "icon",
+              "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gray_star_28.png",
+              "size": "sm"
+            },
+            {
+              "type": "text",
+              "text": "4.0",
+              "flex": 0,
+              "margin": "md",
+              "size": "sm",
+              "color": "#999999"
+            }
+          ]
+        },
+        {
+          "type": "box",
+          "layout": "vertical",
+          "spacing": "sm",
+          "margin": "lg",
+          "contents": [
+            {
+              "type": "box",
+              "layout": "baseline",
+              "spacing": "sm",
+              "contents": [
+                {
+                  "type": "text",
+                  "text": "่วิชาภาษาไทย",
+                  "flex": 1,
+                  "size": "sm",
+                  "color": "#AAAAAA"
+                },
+                {
+                  "type": "text",
+                  "text": ""+ Data1 +" คะแนน",
+                  "size": "sm",
+                  "color": "#666666",
+                  "wrap": true
+                }
+              ]
+            },
+            {
+              "type": "box",
+              "layout": "baseline",
+              "spacing": "sm",
+              "contents": [
+                {
+                  "type": "text",
+                  "text": "วิชาคณิตศาสตร์",
+                  "flex": 1,
+                  "size": "sm",
+                  "color": "#AAAAAA"
+                },
+                {
+                  "type": "text",
+                  "text": ""+ Data2 +" คะแนน",
+                  "size": "sm",
+                  "color": "#666666",
+                  "wrap": true
+                }
+              ]
+            },
+            {
+              "type": "box",
+              "layout": "baseline",
+              "spacing": "sm",
+              "contents": [
+                {
+                  "type": "text",
+                  "text": "ภาษาอังกฤษ",
+                  "flex": 1,
+                  "size": "sm",
+                  "color": "#AAAAAA"
+                },
+                {
+                  "type": "text",
+                  "text": "" + Data3 +" คะแนน",
+                  "size": "sm",
+                  "color": "#666666"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "footer": {
+      "type": "box",
+      "layout": "vertical",
+      "flex": 0,
+      "spacing": "sm",
+      "contents": [
+        {
+          "type": "button",
+          "action": {
+            "type": "uri",
+            "label": "WEBSITE",
+            "uri": "https://linecorp.com"
+          },
+          "height": "sm",
+          "style": "link"
+        },
+        {
+          "type": "spacer",
+          "size": "sm"
+        }
+      ]
+    }
+  }
+
+                
+    
+    };//End if   
+   };//End for
+  
+  
+    
+ UrlFetchApp.fetch(line_endpoint, {
+    'headers': {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer ' + CHANNEL_ACCESS_TOKEN,
+    },
+    'method': 'post',
+    'payload': JSON.stringify({
+      'replyToken': reply_token,
+      'messages': [{
+          'type': 'flex',
+          'altText': 'This is Flex Message',
+          'contents': result        
+        }],
+    }),
+  });
+  
+  
+  return ContentService.createTextOutput(JSON.stringify({'content': 'post ok'})).setMimeType(ContentService.MimeType.JSON);
+}
+
+
